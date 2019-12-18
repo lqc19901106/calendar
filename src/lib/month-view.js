@@ -4,7 +4,12 @@ import cs from 'classnames'
 import dayjs from 'dayjs';
 
 import Cell from './cell'
-import ViewHeader from './view-header'
+import ViewHeader from './view-header';
+
+const months = {
+  'en': ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  'zh-cn':['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']
+}
 
 export default class MonthView extends React.Component {
   static propTypes = {
@@ -16,10 +21,10 @@ export default class MonthView extends React.Component {
 
   getMonth() {
     const month = this.props.date.month();
-    debugger
-    return dayjs.monthsShort().map((item, i) => {
+    
+    return months[dayjs().locale()].map((item, i) => {
       return {
-        label: item,
+        label: item.slice(0, 3),
         disabled: this.checkIfMonthDisabled(i),
         curr: i === month
       }
@@ -27,8 +32,10 @@ export default class MonthView extends React.Component {
   }
 
   cellClick = e => {
-    const month = e.target.innerHTML
+    let month = e.target.innerHTML
     if (this.checkIfMonthDisabled(month)) return
+
+    month = months[dayjs().locale()].findIndex(item => item.indexOf(month) > -1);
 
     const date = this.props.date.clone().month(month)
     this.props.prevView(date)
@@ -70,7 +77,7 @@ export default class MonthView extends React.Component {
     const currentDate = this.props.date.format('YYYY')
     const months = this.getMonth().map((item, i) => (
       <Cell
-        classes={cs({
+        cls={cs({
           month: true,
           disabled: item.disabled,
           current: item.curr

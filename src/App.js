@@ -9,26 +9,13 @@ const App = () => {
     <div>
         <Calendar
           focused={focused}
-          format="YYYY/MM/DD"
-          date="2019/12/13"
+          format="YYYYMMDD"
+          date="20191213"
+          closeOnSelect={true}
           onBlur={() => {
             setFocused(false)
           }}
         />
-        <input
-          type="button"
-          value="Focus date input with a button"
-          onClick={() => {
-            setFocused(true)
-          }}
-        />
-        <div
-          onClick={() => {
-            setFocused(true)
-          }}
-        >
-          Focus date input with a div
-        </div>
       </div>
   );
 }

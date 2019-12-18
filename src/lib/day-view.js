@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 
 import Cell from './cell'
 import ViewHeader from './view-header'
-import { mockComponent } from 'react-dom/test-utils';
 
 export default class DayView extends React.Component {
   static propTypes = {
@@ -51,20 +50,6 @@ export default class DayView extends React.Component {
           day.year() === today.year()
       })
     }
-      // moment.range(start, end)
-      // .by('days', day => {
-      //   days.push({
-      //     label: day.format('D'),
-      //     prev: (day.month() < month && !(day.year() > year)) || day.year() < year,
-      //     next: day.month() > month || day.year() > year,
-      //     disabled: day.isBefore(minDate, 'day') || day.isAfter(maxDate, 'day'),
-      //     curr: day.date() === currDay && day.month() === month,
-      //     today:
-      //       day.date() === today.date() &&
-      //       day.month() === today.month() &&
-      //       day.year() === today.year()
-      //   })
-      // })
     return days
   }
 
@@ -84,17 +69,16 @@ export default class DayView extends React.Component {
     if (isNaN(date)) return
 
     if (cell.className.indexOf('prev') > -1) {
-      newDate.subtract(1, 'months')
+      newDate.subtract(1, 'month')
     } else if (cell.className.indexOf('next') > -1) {
-      newDate.add(1, 'months')
+      newDate.add(1, 'month')
     }
 
-    newDate.date(date)
-    this.props.setInputDate(newDate, true)
+    this.props.setInputDate(newDate.date(date), true)
   }
 
   next = () => {
-    let nextDate = this.props.date.clone().add(1, 'months')
+    let nextDate = this.props.date.clone().add(1, 'month')
     if (this.props.maxDate && nextDate.isAfter(this.props.maxDate, 'day')) {
       nextDate = this.props.maxDate
     }
@@ -102,7 +86,7 @@ export default class DayView extends React.Component {
   }
 
   prev = () => {
-    let prevDate = this.props.date.clone().subtract(1, 'months')
+    let prevDate = this.props.date.clone().subtract(1, 'month')
     if (this.props.minDate && prevDate.isBefore(this.props.minDate, 'day')) {
       prevDate = this.props.minDate
     }
@@ -111,7 +95,7 @@ export default class DayView extends React.Component {
 
   render() {
     const titles = this.getDaysTitles().map((item, i) => (
-      <Cell classes="day title" key={i} value={item.label} />
+      <Cell cls="day title" key={i} value={item.label} />
     ))
     const days = this.getDays().map((item, i) => (
       <Cell

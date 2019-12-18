@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 import cs from 'classnames'
 import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 
 import DaysView from './day-view'
 import MonthsView from './month-view'
@@ -10,10 +11,11 @@ import YearsView from './year-view'
 import Util from './util'
 import getIcon from './icon'
 
-class Calendar extends React.Component {
+class InputCalendar extends React.Component {
   constructor(props, context) {
     super(props, context)
-    dayjs.locale(this.props.locale || 'en')
+    dayjs.locale(this.props.locale || 'zh-cn')
+
     const format = props.format || 'MM-DD-YYYY'
     const computableFormat = props.computableFormat || 'MM-DD-YYYY'
     const strictDateParsing = props.strictDateParsing || false
@@ -46,10 +48,7 @@ class Calendar extends React.Component {
   }
 
   componentDidMount() {
-    document.addEventListener('click', this.documentClick)
-    if (this.props.focused) {
-      this.focusDateInput()
-    }
+    document.addEventListener('click', this.documentClick);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -67,12 +66,6 @@ class Calendar extends React.Component {
     }
 
     this.setState(newState)
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.focused !== prevProps.focused && this.props.focused) {
-      this.focusDateInput()
-    }
   }
 
   componentWillUnmount() {
@@ -142,65 +135,13 @@ class Calendar extends React.Component {
     this.setState({ isCalendar: false })
   }
 
-  focusDateInput = () => {
-    this.dateInput && this.dateInput.focus()
-  }
-
-  inputBlur = e => {
-    let newDate = null
-    let computableDate = null
-    const date = this.state.inputValue
-    const format = this.state.format
-    const parsingFormat = this.state.parsingFormat
-
-    if (date) {
-      // format, with strict parsing true, so we catch bad dates
-      newDate = dayjs(date, parsingFormat, this.props.strictDateParsing)
-      // if the new date didn't match our format, see if the native
-      // js date can parse it
-      if (!newDate.isValid()) {
-        let d = new Date(date)
-        // if native js cannot parse, just make a new date
-        if (isNaN(d.getTime())) {
-          d = new Date()
-        }
-        newDate = dayjs(d)
-      }
-
-      computableDate = newDate.format(this.state.computableFormat)
-    }
-
-    this.setState({
-      date: newDate,
-      inputValue: newDate ? newDate.format(format) : null
-    })
-
-    this.props.onChange && this.props.onChange(computableDate)
-    this.props.onBlur && this.props.onBlur(e, computableDate)
-  }
-
-  inputFocus = e => {
-    if (this.props.openOnInputFocus) {
-      this.toggleClick()
-    }
-    this.props.onFocus && this.props.onFocus(e)
-  }
-
   keyDown = e => {
     Util.keyDownActions.call(this, e.keyCode)
   }
 
-  inputKeyUp = e => {
-    this.props.onInputKeyUp && this.props.onInputKeyUp(e)
-  }
-
-  inputKeyDown = e => {
-    this.props.onInputKeyDown && this.props.onInputKeyDown(e)
-  }
-
   nextView = () => {
     if (this.checkIfDateDisabled(this.state.date)) return
-    this.setState({ currentView: ++this.state.currentView })
+    this.setState({ currentView: this.state.currentView + 1})
   }
 
   prevView = date => {
@@ -225,7 +166,7 @@ class Calendar extends React.Component {
     } else {
       this.setState({
         date,
-        currentView: --this.state.currentView
+        currentView: this.state.currentView - 1
       })
     }
   }
@@ -284,7 +225,7 @@ class Calendar extends React.Component {
     // pass null for the date into the calendar pop up, as we want
     // it to just start on todays date if there is no date set
     const view = this.getView()
-    const todayText = this.props.todayText || (dayjs.locale() === 'de' ? 'Heute' : 'Today')
+    const todayText = this.props.todayText || (dayjs.locale() === 'en' ? 'Today' : '今天')
     const calendarClass = cs({
       'input-calendar-wrapper': true,
       'icon-hidden': this.props.hideIcon
@@ -295,9 +236,7 @@ class Calendar extends React.Component {
       ) : (
         <div className={calendarClass} onClick={this.calendarClick}>
           {view}
-          {this.props.hideTodayButton ? (
-            undefined
-          ) : (
+          {!this.props.hideTodayButton && (
             <span
               className={`today-btn${
                 this.checkIfDateDisabled(dayjs().startOf('day')) ? ' disabled' : ''
@@ -309,7 +248,6 @@ class Calendar extends React.Component {
           )}
         </div>
       )
-    const readOnly = Util.checkForMobile(this.props.hideTouchKeyboard)
     const calendarIcon = getIcon(this.props, this.toggleClick)
     const inputClass = this.props.inputFieldClass || 'input-calendar-field'
 
@@ -319,18 +257,13 @@ class Calendar extends React.Component {
           name={this.props.inputName}
           className={inputClass}
           id={this.props.inputFieldId}
-          onBlur={this.inputBlur}
+          onClick={this.toggleClick}
           onChange={this.changeDate}
-          onFocus={this.inputFocus}
-          onKeyUp={this.inputKeyUp}
-          onKeyDown={this.inputKeyDown}
           placeholder={this.props.placeholder}
-          readOnly={readOnly}
+          readOnly={true}
           disabled={this.props.disabled}
           type="text"
-          ref={input => {
-            this.dateInput = input
-          }}
+          ref={input => { this.dateInput = input }}
           value={this.state.inputValue || ''}
         />
         {calendarIcon}
@@ -340,7 +273,7 @@ class Calendar extends React.Component {
   }
 }
 
-Calendar.propTypes = {
+InputCalendar.propTypes = {
   closeOnSelect: PropTypes.bool,
   computableFormat: PropTypes.string,
   strictDateParsing: PropTypes.bool,
@@ -373,4 +306,4 @@ Calendar.propTypes = {
   onInputChange: PropTypes.func,
 }
 
-export default Calendar
+export default InputCalendar

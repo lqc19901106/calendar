@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import cs from 'classnames'
-import moment from 'dayjs';
 
 import Cell from './cell'
 import ViewHeader from './view-header'
@@ -37,16 +36,15 @@ export default class YearsView extends React.Component {
     if (years.length > 0 && inRange) {
       return years
     }
-
-    moment()
-      .range(start, end)
-      .by('years', year => {
-        items.push({
-          label: year.format('YYYY'),
+    const diff = new Array(Math.ceil(end.diff(start, 'year', true)));
+    for (let index = 0; index < diff.length; index++) {
+      const year= start.add(index, 'year');
+      items.push({
+        label: year.format('YYYY'),
           disabled: this.checkIfYearDisabled(year),
           curr: currYear === year.year()
-        })
       })
+    }
 
     this.setState({ years: items })
 
@@ -91,7 +89,7 @@ export default class YearsView extends React.Component {
 
   rangeCheck = currYear => {
     const { years } = this.state
-    if (years.length == 0) {
+    if (years.length === 0) {
       return false
     }
     return years[0].label <= currYear && years[years.length - 1].label >= currYear
@@ -103,10 +101,10 @@ export default class YearsView extends React.Component {
     const yearsCells = years.map((item, i) => (
       <Cell
         value={item.label}
-        classes={cs({
+        cls={cs({
           year: true,
           disabled: item.disabled,
-          current: item.label == currYear
+          current: item.label === currYear
         })}
         key={i}
       />
